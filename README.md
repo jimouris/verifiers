@@ -184,4 +184,4 @@ Then call it from [src/index.ts](src/index.ts). See `verifyAmdSev()` and `verify
 
 ## License
 
-ISC
+Apache 2.0
