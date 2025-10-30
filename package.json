@@ -1,0 +1,36 @@
+{
+  "name": "verifiers",
+  "version": "1.0.0",
+  "description": "Verifiers for [proofofcloud.org](https://proofofcloud.org). The goal is to have a simple API backend to:",
+  "type": "module",
+  "main": "src/index.ts",
+  "scripts": {
+    "dev": "tsx watch src/index.ts",
+    "start": "tsx src/index.ts",
+    "build": "tsc --noEmit",
+    "test": "jest"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/proofofcloud/verifiers.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/proofofcloud/verifiers/issues"
+  },
+  "homepage": "https://github.com/proofofcloud/verifiers#readme",
+  "dependencies": {
+    "@hono/node-server": "^1.19.5",
+    "hono": "^4.10.4"
+  },
+  "devDependencies": {
+    "@types/jest": "^30.0.0",
+    "@types/node": "^24.9.2",
+    "jest": "^29.7.0",
+    "ts-jest": "^29.4.5",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
+  }
+}

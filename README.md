@@ -1,9 +1,187 @@
 # verifiers
 
-Verifiers for [proofofcloud.org](https://proofofcloud.org). The goal is to have a simple API backend to:
+Verifiers for [proofofcloud.org](https://proofofcloud.org). A simple API backend to verify TEE attestation reports and query hardware IDs.
 
-1. Verify a given attestation report is valid, and can pass the Proof-of-Cloud verification
-2. Query if a given hardware id is accepted by the Proof-of-Cloud verification
+## Features
 
-The verifier should support major TEE vendors like Intel DCAP attestations (Intel TDX and Intel SGX), AMD SEV(-SNP), and AWS Nitro Enclave.
+- **Intel DCAP Support**: Verify Intel TDX and SGX attestations (via Phala Cloud API)
+- **Extensible Architecture**: Easy to add AMD SEV-SNP and AWS Nitro Enclave verifiers
+- **Simple API**: Two straightforward endpoints for verification and hardware ID queries
+- **TypeScript**: Full type safety with Hono framework
 
+## Getting Started
+
+### Prerequisites
+
+- Node.js 18+ or Bun
+- npm or yarn
+
+### Installation
+
+```bash
+npm install
+```
+
+### Development
+
+```bash
+npm run dev
+```
+
+The server will start on `http://localhost:3000` with hot reload enabled.
+
+### Production
+
+```bash
+npm start
+```
+
+### Testing
+
+```bash
+npm test
+```
+
+The test verifies Intel DCAP attestation using a real quote from [tests/quote-no-poc.bin](tests/quote-no-poc.bin). It demonstrates:
+- Reading binary quote files and converting to hex
+- Calling the verification API
+- Parsing all returned fields (header, body, certificates, etc.)
+
+## API Endpoints
+
+### 1. Verify Attestation
+
+**POST** `/attestations/verify`
+
+Verify a TEE attestation quote and check if it passes Proof-of-Cloud verification.
+
+**Request:**
+```bash
+curl -X POST "http://localhost:3000/attestations/verify" \
+  -H "Content-Type: application/json" \
+  -d '{"hex": "0x040002000..."}'
+```
+
+**Request Body:**
+```json
+{
+  "hex": "0x040002000..."
+}
+```
+
+**Response (Success):**
+```json
+{
+  "success": true,
+  "quote": {
+    "verified": true,
+    "header": {
+      "tee_type": "TEE_TDX"
+    }
+  },
+  "checksum": "9aa049fb9049d4f582ca316206f7cf34ee185c2b5b63370a518921432385b81a",
+  "proof_of_cloud": true
+}
+```
+
+**Response (Error):**
+```json
+{
+  "success": false,
+  "error": "verification_failed",
+  "message": "Intel DCAP verification failed: ..."
+}
+```
+
+### 2. Check Hardware ID
+
+**GET** `/hardware_id/:id`
+
+Query if a hardware ID is verified and accepted by Proof-of-Cloud.
+
+**Request:**
+```bash
+curl "http://localhost:3000/hardware_id/abc123"
+```
+
+**Response (Found):**
+```json
+{
+  "success": true
+}
+```
+
+**Response (Not Found):**
+```json
+{
+  "success": false,
+  "error": "not_found",
+  "message": "Hardware ID 'abc123' is not verified"
+}
+```
+
+### 3. Health Check
+
+**GET** `/`
+
+Check service status and available endpoints.
+
+**Response:**
+```json
+{
+  "name": "Proof-of-Cloud Verifiers",
+  "version": "1.0.0",
+  "status": "running",
+  "endpoints": {
+    "attestation_verify": "POST /attestations/verify",
+    "hardware_check": "GET /hardware_id/:id"
+  }
+}
+```
+
+## Architecture
+
+Simple, flat structure - just **~130 lines of code**:
+
+```
+src/
+├── index.ts       # Main app (50 lines)
+├── verifiers.ts   # Verification functions (53 lines)
+├── hardware.ts    # Hardware registry (17 lines)
+└── types.ts       # Type definitions (9 lines)
+```
+
+### Supported TEE Vendors
+
+| Vendor | Status | Notes |
+|--------|--------|-------|
+| Intel TDX/SGX | ✅ Implemented | Via Phala Cloud API |
+| AMD SEV-SNP | 🚧 Stub | Contributors welcome |
+| AWS Nitro | 🚧 Stub | Contributors welcome |
+
+## Contributing
+
+We welcome contributions to add support for additional TEE vendors!
+
+### Adding a New Verifier
+
+Just add a function to [src/verifiers.ts](src/verifiers.ts):
+
+```typescript
+export async function verifyMyTee(hex: string): Promise<AttestationResponse> {
+  // Your verification logic here
+  const result = await fetch("...");
+  return {
+    success: true,
+    quote: result.quote,
+    checksum: result.checksum,
+    proof_of_cloud: result.verified
+  };
+}
+```
+
+Then call it from [src/index.ts](src/index.ts). See `verifyAmdSev()` and `verifyAwsNitro()` stubs in [src/verifiers.ts](src/verifiers.ts) for guidance.
+
+## License
+
+ISC
