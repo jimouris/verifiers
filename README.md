@@ -165,22 +165,20 @@ We welcome contributions to add support for additional TEE vendors!
 
 ### Adding a New Verifier
 
-Just add a function to [src/verifiers.ts](src/verifiers.ts):
+Add a function to [src/verifiers.ts](src/verifiers.ts) that takes a string input and returns an `AttestationResponse`:
 
 ```typescript
-export async function verifyMyTee(hex: string): Promise<AttestationResponse> {
-  // Your verification logic here
-  const result = await fetch("...");
+export async function verifyYourTee(input: string): Promise<AttestationResponse> {
+  // Call your verification API or implement verification logic
   return {
     success: true,
-    quote: result.quote,
-    checksum: result.checksum,
-    proof_of_cloud: result.verified
+    proof_of_cloud: true,
+    quote: detaildQuoteData,
   };
 }
 ```
 
-Then call it from [src/index.ts](src/index.ts). See `verifyAmdSev()` and `verifyAwsNitro()` stubs in [src/verifiers.ts](src/verifiers.ts) for guidance.
+Then update [src/index.ts](src/index.ts) to call your verifier. You can add a `type` field to the request, auto-detect from hex format, or try verifiers sequentially. See the existing `verifyIntelDcap()` implementation for reference.
 
 ## License
 
