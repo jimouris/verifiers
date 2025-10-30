@@ -79,7 +79,6 @@ curl -X POST "http://localhost:3000/attestations/verify" \
       "tee_type": "TEE_TDX"
     }
   },
-  "checksum": "9aa049fb9049d4f582ca316206f7cf34ee185c2b5b63370a518921432385b81a",
   "proof_of_cloud": true
 }
 ```
